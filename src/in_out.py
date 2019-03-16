@@ -138,6 +138,29 @@ def load_point_clouds_from_filenames(file_names, n_threads, loader, verbose=Fals
     return pclouds, model_names, class_ids
 
 
+def load_point_clouds_from_filenames2(file_names, n_threads, loader, verbose=False):
+    pc = loader(file_names[0])[0]
+    #pclouds = np.empty([len(file_names), pc.shape[0], pc.shape[1]], dtype=np.float32)
+    pclouds = [None] * len(file_names)
+    model_names = np.empty([len(file_names)], dtype=object)
+    class_ids = np.empty([len(file_names)], dtype=object)
+    pool = Pool(n_threads)
+
+    for i, data in enumerate(pool.imap(loader, file_names)):
+        pclouds[i], model_names[i], class_ids[i] = data
+
+    pool.close()
+    pool.join()
+
+    if len(np.unique(model_names)) != len(pclouds):
+        warnings.warn('Point clouds with the same model name were loaded.')
+
+    if verbose:
+        print('{0} pclouds were loaded. They belong in {1} shape-classes.'.format(len(pclouds), len(np.unique(class_ids))))
+
+    return pclouds, model_names, class_ids
+
+
 class PointCloudDataSet(object):
     '''
     See https://github.com/tensorflow/tensorflow/blob/a5d8217c4ed90041bea2616c14a8ddcf11ec8c03/tensorflow/examples/tutorials/mnist/input_data.py
