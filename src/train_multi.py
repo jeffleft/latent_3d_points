@@ -18,6 +18,7 @@ from latent_3d_points.src.in_out import snc_category_to_synth_id, create_dir, Po
 
 from latent_3d_points.src.tf_utils import reset_tf_graph
 from latent_3d_points.src.general_utils import plot_3d_point_cloud
+import numpy as np
 
 top_out_dir = '../data/'          # Use to save Neural-Net check-points etc.
 top_in_dir = '../data/shape_net_core_uniform_samples_2048/' # Top-dir of where point-clouds are stored.
