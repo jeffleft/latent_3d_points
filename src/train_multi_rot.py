@@ -49,7 +49,8 @@ for class_name in class_names:
         pc_data = load_all_point_clouds_under_folder(class_dir, n_threads=8, file_ending='.ply', verbose=True)
         assert all_pc_data.n_points == pc_data.n_points
         all_pc_data.num_examples += pc_data.num_examples
-        all_pc_data.labels = np.vstack((all_pc_data.labels, pc_data.labels))
+        #all_pc_data.labels = np.vstack((all_pc_data.labels, pc_data.labels))
+        all_pc_data.labels.append(pc_data.labels)
         all_pc_data.point_clouds = np.vstack((all_pc_data.point_clouds, pc_data.point_clouds))
 
 # load default training parameters
