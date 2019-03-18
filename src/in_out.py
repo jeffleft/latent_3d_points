@@ -119,6 +119,8 @@ def load_all_point_clouds_under_folder(top_dir, n_threads=20, file_ending='.ply'
 def load_all_point_clouds_under_folder2(top_dir, n_threads=20, file_ending='.ply', verbose=False):
     file_names = [f for f in files_in_subdirs(top_dir, file_ending)]
     n_files = count_files_larger_than_2048(file_names, n_threads, pc_loader)
+    if verbose:
+        print('%d files fufill condition' % n_files)
     pclouds, model_ids, syn_ids = load_point_clouds_from_filenames3(n_files, file_names, n_threads, loader=pc_loader, verbose=verbose)
     return PointCloudDataSet(pclouds, labels=syn_ids + '_' + model_ids, init_shuffle=False)
 
@@ -198,7 +200,10 @@ def load_point_clouds_from_filenames3(n_files, file_names, n_threads, loader, ve
         if pclouds.shape[0] > 2048:
             model_names[j] = mn
             class_ids[j] = ci
-            pclouds[j, :, :] = pc[np.random.choice(pc.shape[0], 2048, replace=False),:]
+            try:
+                pclouds[j, :, :] = pc[np.random.choice(pc.shape[0], 2048, replace=False),:]
+            except:
+                print(pc.shape)
             j+=1
 
     pool.close()
