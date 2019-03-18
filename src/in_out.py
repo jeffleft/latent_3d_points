@@ -116,6 +116,13 @@ def load_all_point_clouds_under_folder(top_dir, n_threads=20, file_ending='.ply'
     return PointCloudDataSet(pclouds, labels=syn_ids + '_' + model_ids, init_shuffle=False)
 
 
+def load_all_point_clouds_under_folder2(top_dir, n_threads=20, file_ending='.ply', verbose=False):
+    file_names = [f for f in files_in_subdirs(top_dir, file_ending)]
+    n_files = count_files_larger_than_2048(file_names, n_threads, pc_loader)
+    pclouds, model_ids, syn_ids = load_point_clouds_from_filenames3(n_files, file_names, n_threads, loader=pc_loader, verbose=verbose)
+    return PointCloudDataSet(pclouds, labels=syn_ids + '_' + model_ids, init_shuffle=False)
+
+
 def load_point_clouds_from_filenames(file_names, n_threads, loader, verbose=False):
     pc = loader(file_names[0])[0]
     pclouds = np.empty([len(file_names), pc.shape[0], pc.shape[1]], dtype=np.float32)
@@ -159,6 +166,52 @@ def load_point_clouds_from_filenames2(file_names, n_threads, loader, verbose=Fal
         print('{0} pclouds were loaded. They belong in {1} shape-classes.'.format(len(pclouds), len(np.unique(class_ids))))
 
     return pclouds, model_names, class_ids
+
+
+def count_files_larger_than_2048(file_names, n_threads, loader):
+    pool = Pool(n_threads)
+    count = 0
+
+    for i, data in enumerate(pool.imap(loader, file_names)):
+        pc, mn, ci = data
+        if pc.shape[0] >= 2048:
+            count += 1
+    
+    pool.close()
+    pool.join()
+
+    return count
+
+
+def load_point_clouds_from_filenames3(n_files, file_names, n_threads, loader, verbose=False):
+    """ Only load point clouds larger than 2048, and randomly sample"""
+    pc = loader(file_names[0])[0]
+    assert pc.shape[0] == 2048
+    pclouds = np.empty([n_files, pc.shape[0], pc.shape[1]], dtype=np.float32
+    model_names = np.empty([n_files], dtype=object)
+    class_ids = np.empty([n_files], dtype=object)
+    pool = Pool(n_threads)
+
+    j=0
+    for i, data in enumerate(pool.imap(loader, file_names)):
+        pc, mn, ci = data
+        if pclouds.shape[0] >= 2048:
+            model_names[j] = mn
+            class_ids[j] = ci
+            pclouds[j, :, :] = pc[np.random.choice(pc.shape[0], 2048, replace=False),:]
+            j+=1
+
+    pool.close()
+    pool.join()
+
+    if len(np.unique(model_names)) != len(pclouds):
+        warnings.warn('Point clouds with the same model name were loaded.')
+
+    if verbose:
+        print('{0} pclouds were loaded. They belong in {1} shape-classes.'.format(len(pclouds), len(np.unique(class_ids))))
+
+    return pclouds, model_names, class_ids
+
 
 
 class PointCloudDataSet(object):
