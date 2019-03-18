@@ -174,7 +174,7 @@ def count_files_larger_than_2048(file_names, n_threads, loader):
 
     for i, data in enumerate(pool.imap(loader, file_names)):
         pc, mn, ci = data
-        if pc.shape[0] >= 2048:
+        if pc.shape[0] > 2048:
             count += 1
     
     pool.close()
@@ -195,7 +195,7 @@ def load_point_clouds_from_filenames3(n_files, file_names, n_threads, loader, ve
     j=0
     for i, data in enumerate(pool.imap(loader, file_names)):
         pc, mn, ci = data
-        if pclouds.shape[0] >= 2048:
+        if pclouds.shape[0] > 2048:
             model_names[j] = mn
             class_ids[j] = ci
             pclouds[j, :, :] = pc[np.random.choice(pc.shape[0], 2048, replace=False),:]
