@@ -185,9 +185,9 @@ def count_files_larger_than_2048(file_names, n_threads, loader):
 
 def load_point_clouds_from_filenames3(n_files, file_names, n_threads, loader, verbose=False):
     """ Only load point clouds larger than 2048, and randomly sample"""
-    pc = loader(file_names[0])[0]
-    assert pc.shape[0] == 2048
-    pclouds = np.empty([n_files, pc.shape[0], pc.shape[1]], dtype=np.float32)
+    #pc = loader(file_names[0])[0]
+    #assert pc.shape[0] == 2048
+    pclouds = np.empty([n_files, 2048, 3], dtype=np.float32)
     model_names = np.empty([n_files], dtype=object)
     class_ids = np.empty([n_files], dtype=object)
     pool = Pool(n_threads)
