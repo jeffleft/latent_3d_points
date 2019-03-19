@@ -36,7 +36,7 @@ class_names = ["airplane",
                "vessel"]
 
 # experiment name
-experiment_name = 'multi_class'
+experiment_name = 'multi_class_rot'
 
 for class_name in class_names:
 

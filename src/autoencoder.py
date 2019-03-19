@@ -21,11 +21,12 @@ class Configuration():
                  training_epochs=200, batch_size=10, learning_rate=0.001, denoising=False,
                  saver_step=None, train_dir=None, z_rotate=False, loss='chamfer', gauss_augment=None,
                  saver_max_to_keep=None, loss_display_step=1, debug=False,
-                 n_z=None, n_output=None, latent_vs_recon=1.0, consistent_io=None):
+                 n_z=None, n_output=None, latent_vs_recon=1.0, consistent_io=None, completing=False):
 
         # Parameters for any AE
         self.n_input = n_input
         self.is_denoising = denoising
+        self.is_completing = completing
         self.loss = loss.lower()
         self.decoder = decoder
         self.encoder = encoder
@@ -89,6 +90,7 @@ class AutoEncoder(Neural_Net):
     def __init__(self, name, graph, configuration):
         Neural_Net.__init__(self, name, graph)
         self.is_denoising = configuration.is_denoising
+        self.is_completing = configuration.is_completing
         self.n_input = configuration.n_input
         self.n_output = configuration.n_output
 
@@ -98,6 +100,8 @@ class AutoEncoder(Neural_Net):
         with tf.variable_scope(name):
             self.x = tf.placeholder(tf.float32, in_shape)
             if self.is_denoising:
+                self.gt = tf.placeholder(tf.float32, out_shape)
+            elif self.is_completing:
                 self.gt = tf.placeholder(tf.float32, out_shape)
             else:
                 self.gt = self.x
@@ -203,6 +207,8 @@ class AutoEncoder(Neural_Net):
             if feed_data is None:
                 feed_data = original_data
             feed_data = apply_augmentations(feed_data, configuration)  # This is a new copy of the batch.
+        elif self.is_completing:
+            # TODO: 
         else:
             original_data, ids, _ = in_data.full_epoch_data(shuffle=False)
             feed_data = apply_augmentations(original_data, configuration)
@@ -212,6 +218,8 @@ class AutoEncoder(Neural_Net):
         for i in xrange(0, n_examples, b):
             if self.is_denoising:
                 reconstructions[i:i + b], loss = self.reconstruct(feed_data[i:i + b], original_data[i:i + b])
+            elif self.is_completing:
+                #TODO
             else:
                 reconstructions[i:i + b], loss = self.reconstruct(feed_data[i:i + b])
 

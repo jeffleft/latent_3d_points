@@ -117,6 +117,8 @@ class PointNetAutoEncoder(AutoEncoder):
                 original_data, _, batch_i = train_data.next_batch(batch_size)
                 if batch_i is None:  # In this case the denoising concern only the augmentation.
                     batch_i = original_data
+            elif self.is_completing:
+                #TODO
             else:
                 batch_i, _, _ = train_data.next_batch(batch_size)
 
@@ -124,6 +126,8 @@ class PointNetAutoEncoder(AutoEncoder):
 
             if self.is_denoising:
                 _, loss = fit(batch_i, original_data)
+            elif self.is_completing:
+                #TODO
             else:
                 _, loss = fit(batch_i)
 
